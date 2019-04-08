@@ -315,7 +315,7 @@ op::PoseCpuRenderer poseRenderer{poseModel, (float)FLAGS_render_threshold, !FLAG
 op::ScaleAndSizeExtractor scaleAndSizeExtractor(netInputSize, outputSize, FLAGS_scale_number, FLAGS_scale_gap);
 
 op::FaceDetector *faceDetector;
-op::FaceExtractor *faceExtractor;
+op::FaceExtractorNet *faceExtractor;
 op::FaceRenderer *faceRenderer;
 
 op::OpOutputToCvMat *opOutputToCvMat;
@@ -414,6 +414,7 @@ openpose_ros_msgs::Persons processImgForPoseDetection(cv_bridge::CvImagePtr &cv_
         persons.persons.push_back(person);
     }
 
+    publish_pose.publish(persons);
 
     // publish result image with annotation.
     if (!FLAGS_result_image_topic.empty()) {
@@ -489,7 +490,7 @@ int main(int argc, char *argv[])
     image_transport::ImageTransport img_t(nh);
     image_transport::Subscriber sub = img_t.subscribe(camera_src, 1, imageCallback);
     if (!FLAGS_result_image_topic.empty()) {
-        publish_result = img_t.advertise(FLAGS_result_image_topic, 1);
+        publish_result = img_t.advertise(FLAGS_result_image_topic, 2);
     }
     publish_pose = nh.advertise<openpose_ros_msgs::Persons>("/openpose/pose", 1);
     pose_srv = nh.advertiseService("people_pose_from_img", peoplePoseFromImg);
